@@ -7,10 +7,13 @@ import InfiniteScroll from 'react-infinite-scroll-component';
 export default class NewsComponent extends Component {
   static defaultProps = {
     country: "in",
-    pageSize: 10,
+    pageSize: 5,
     category: "general",
   };
-
+  apiKeys1 = '76f913c3e3c441b38a55d6be51067b23'
+  apiKeys2 = '5492d15efa364a81b2dfb08126dc1dd4'
+  apiKeys3 = '6a9bb9c1acf648138ec02d9b79f533ff'
+  apiKeys4 = '7a2b71b9500a4c0d882ebd629c85a7c0'
   articles = [];
 
   constructor() {
@@ -24,93 +27,64 @@ export default class NewsComponent extends Component {
     };
   }
   async updateNews() {
-    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=76f913c3e3c441b38a55d6be51067b23&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+    this.props.setProgress(10)
+    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${this.apiKeys1}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
     this.setState({ loading: true });
+    this.props.setProgress(30)
     let data = await fetch(url);
     let newdata = await data.json();
     console.log(newdata);
+    this.props.setProgress(60)
+
     this.setState({
       articles: newdata.articles,
       totalResults: newdata.totalResults,
       loading: false,
     });
+    this.props.setProgress(100)
   }
   async componentDidMount() {
     this.updateNews();
   }
  
-  // nextPage = async() => {
-  //   // if(!(this.state.page +1 >(Math.ceil(this.state.totalResults/this.props.pageSize)))){
-  //   //   let url =
-  //   //   `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=76f913c3e3c441b38a55d6be51067b23&page=${this.state.page + 1}&pageSize=${this.props.pageSize}`;
-  //   //   this.setState({loading:true})
-  //   //   let data = await fetch(url);
-  //   //   let newdata = await data.json();
-  //   //   console.log(newdata);
-  //   //   this.setState({
-  //   //     articles: newdata.articles,
-  //   //     page: this.state.page + 1,
-  //   //     loading:false,
-  //   //   });
-  //   // }
-  //   this.setState({
-  //     page:this.state.page+1
-  //   })
-  //   this.scrollToTop()
-  //   this.updateNews()
-
-  // };
-
-  // previousPage = async() => {
-  //   // let url =
-  //   // `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=76f913c3e3c441b38a55d6be51067b23&page=${this.state.page - 1}&pageSize=${this.props.pageSize}`;
-  //   // this.setState({loading:true})
-  //   // let data = await fetch(url);
-  //   // let newdata = await data.json();
-  //   // console.log(newdata);
-  //   // this.setState({
-  //   //   articles: newdata.articles,
-  //   //   page: this.state.page - 1,
-  //   //   loading:false,
-  //   // });
-  //   this.setState({
-  //     page:this.state.page+1
-  //   })
-  //   this.scrollToTop()
-  //   this.updateNews()
-  // };
+  
   fetchMoreData = async () => {
     this.setState({
       page: this.state.page + 1,
     });
-    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=76f913c3e3c441b38a55d6be51067b23&page=${this.state.page}&pageSize=${this.props.pageSize}`;
-  
+    let url = `https://newsapi.org/v2/top-headlines?country=${this.props.country}&category=${this.props.category}&apiKey=${this.apiKeys1}&page=${this.state.page}&pageSize=${this.props.pageSize}`;
+  setTimeout(async() => {
+    this.setState({ loading: true });
     let data = await fetch(url);
     let newdata = await data.json();
     console.log(newdata);
-    this.setState((prevState)=>({
-      articles: [...prevState.articles, ...newdata.articles],
+    this.setState(()=>({
+      // articles: [...prevState.articles, ...newdata.articles],
+      articles: this.state.articles.concat(newdata.articles),
       totalResults: newdata.totalResults,
-    
     }));
+  }, 1500);
   };
-
+   capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
   render() {
     return (
       <>
       
-        <div className="container">
-          <h1 className="text-center my-4">Trending News</h1>
+        <div className="container newsContainer">
+          <h1 className="text-center my-4">Top {this.capitalizeFirstLetter(this.props.category)} Headlines</h1>
           {this.state.loading && <Loader/>}
           <InfiniteScroll
             dataLength={this.state.articles.length}
             next={this.fetchMoreData}
             hasMore={this.state.articles.length !== this.state.totalResults}
             // hasMore ={true}
-            loader={<span>Loading...</span>}
+            loader={<Loader/>}
+            // scrollableTarget="scrollableDiv"
           >
-        
+        <div className="container">
           <div className="row">
               {this.state.articles.map((e) => {
                 return (
@@ -129,28 +103,11 @@ export default class NewsComponent extends Component {
                   </div>
                 );
               })}
-   
+            </div>
             </div>
           </InfiniteScroll>
         </div>
-        {/* <div className="container d-flex justify-content-between my-5">
-          <button
-            type="button"
-            disabled={this.state.page <= 1}
-            className="btn btn-dark"
-            onClick={this.previousPage}
-          >
-            &larr; Previous
-          </button>
-          <button
-            type="button"
-            disabled={this.state.page +1 >(Math.ceil(this.state.totalResults/20))}
-            className="btn btn-dark"
-            onClick={this.nextPage}
-          >
-            Next &rarr;
-          </button>
-        </div> */}
+    
       </>
     );
   }

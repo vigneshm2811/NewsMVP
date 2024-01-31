@@ -26,3 +26,10 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+
+  .infinite-scroll-component{
+    overflow: hidden !important;
+  } 
+  .newsContainer{
+    margin-top: 100px !important;
+  }
